@@ -1,0 +1,116 @@
+# =============================================================================
+#  CANVAS WOMAN — site settings and editable copy
+#  Change text here, run  python3 build.py  and every page updates.
+#
+#  Lines marked  # CONFIRM  were written only from facts in the project brief.
+#  They are NOT the client's approved wording — paste the verbatim copy from
+#  the brief over them before launch.
+# =============================================================================
+
+countries = ["India", "France", "United Kingdom", "Greece", "Japan", "United States"]
+
+[site]
+brand = "CANVAS WOMAN"
+name = "Canvas Woman"                      # used in page titles and schema
+domain = "canvaswoman.com"
+url = "https://canvaswoman.com"            # canonical origin, no trailing slash
+language = "en-IN"
+og_locale = "en_IN"
+
+[home]
+seo_title = "Canvas Woman | Original & Commissioned Art by Sreeparna Poddar"   # CONFIRM against brief
+seo_description = "Original abstract, texture, landscape and contemporary paintings by Sreeparna Poddar, with custom commissions created for your space. Gurugram, Delhi NCR."   # CONFIRM against brief
+tagline = "Art created for the space it belongs in."
+hero_painting = "azure-reverie"            # slug of the painting shown in the hero
+
+[artist]
+name = "Sreeparna Poddar"                  # spelling is fixed
+first_name = "Sreeparna"
+identity = "Original & Commissioned Art by Sreeparna Poddar"
+portrait = ""                              # e.g. "artist/portrait.jpg" inside content/images/ — empty shows a labelled placeholder
+portrait_alt = "Sreeparna Poddar"
+# Six paragraphs. CONFIRM — replace with the verbatim biography from the brief.
+bio = [
+  "Sreeparna Poddar’s relationship with painting began in childhood.",
+  "After years spent working across different professional fields, she found her way back to what had always remained constant — a fascination with colour, form, texture and the act of creating.",
+  "Her practice spans abstract, textured, contemporary and landscape painting, with a particular focus on custom work created for specific spaces and the people who live with them.",
+  "Her paintings have found homes across India, France, the United Kingdom, Greece, Japan and the United States.",
+  "She has exhibited in Delhi through galleries and curated art spaces, and works independently with collectors and clients.",
+  "For Sreeparna, painting remains an evolving practice.",
+]
+
+[art]
+quote = "I believe a painting becomes truly meaningful when it finds the right space and the right person."
+# Two paragraphs. CONFIRM — replace with the verbatim philosophy text from the brief.
+philosophy = [
+  "The work moves between abstraction, sculpted texture, landscape and contemporary pop colour, held together by a lasting attention to colour, form and surface.",
+  "Because a painting lives in a particular room, with its own light and its own people, much of the work is shaped with that setting in mind — whether a piece from the collection is adapted, or a new painting is created for a wall that is still waiting for it.",
+]
+
+[customise]
+# CONFIRM — replace with the "Make it your own" copy from the brief.
+intro = "This painting can be adapted to suit your space — in its size, its palette, its details and its framing — while keeping the character of the original."
+size = "Scaled up or down, or re-proportioned to suit a particular wall, alcove or piece of furniture."
+palette = "Tones shifted to sit comfortably with your walls, upholstery, flooring or existing art."
+details = "Elements such as texture, metallic accents, density of detail or composition refined for your setting."
+framing = "Finished with the frame that suits the room, or left unframed for a clean gallery edge."
+
+[contact]
+whatsapp = "918240343317"                  # digits only, with country code
+whatsapp_display = "+91 82403 43317"
+instagram_url = "https://www.instagram.com/canvas_woman"
+instagram_handle = "canvas_woman"
+facebook_url = "https://www.facebook.com/share/1JYZXLvn4i/"
+location_parts = ["Golf Course Road", "Gurugram", "Delhi NCR", "India"]
+locality = "Gurugram"
+region = "Haryana"
+country_code = "IN"
+viewings = "Private Viewings by Appointment"
+# The full residential address is intentionally NOT published.
+
+[whatsapp_messages]
+# {title} and {url} are filled in automatically for each painting.
+general = "Hi Sreeparna, I came across Canvas Woman and would like to know more about your work."
+commission = "Hi Sreeparna, I'm interested in commissioning a custom artwork and would like to discuss my space and requirements."
+available = "Hi, I'm interested in the artwork '{title}'. Is the original currently available?\n{url}"
+customise = "Hi, I'm interested in the artwork '{title}'. I would like to know about customisation options.\n{url}"
+sold = "Hi, I saw the artwork '{title}', which is marked as sold. I would like to discuss something similar for my space.\n{url}"
+commission_work = "Hi, I saw the commissioned work '{title}' and would like to discuss a similar painting for my space.\n{url}"
+made_to_order = "Hi, I'm interested in the artwork '{title}' and would like to discuss having it made to order.\n{url}"
+
+# Categories. "key" is the value used in paintings.toml; "slug" is the URL.
+[[category]]
+key = "abstract"
+slug = "abstract"
+name = "Abstract"
+blurb = "Colour, movement and gesture"
+intro = "Abstract paintings built on colour, movement and gesture, from quiet fields of tone to layered, fluid compositions."
+seo_title = "Abstract Paintings by Sreeparna Poddar"
+cover = "paintings/azure-reverie/detail-1.jpg"
+
+[[category]]
+key = "texture"
+slug = "texture-art"
+name = "Texture Art"
+blurb = "Relief, surface and light"
+intro = "Textured paintings with sculpted, raised surfaces that change as light moves across them."
+seo_title = "Texture Art by Sreeparna Poddar"
+cover = "paintings/ivory-tide/detail-1.jpg"
+
+[[category]]
+key = "landscape"
+slug = "landscape"
+name = "Landscape / Scenery"
+blurb = "Place, atmosphere and horizon"
+intro = "Landscapes and scenery that hold the atmosphere of a place — mountains, fields, water and changing light."
+seo_title = "Landscape & Scenery Paintings by Sreeparna Poddar"
+cover = "paintings/himalayan-morning/detail-1.jpg"
+
+[[category]]
+key = "pop"
+slug = "pop-contemporary"
+name = "Pop / Contemporary Art"
+blurb = "Bold colour and graphic form"
+intro = "Contemporary and pop paintings in bold colour and graphic form, made to bring energy to a room."
+seo_title = "Pop & Contemporary Art by Sreeparna Poddar"
+cover = "paintings/marigold-pop/detail-1.jpg"

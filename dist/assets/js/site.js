@@ -1,0 +1,218 @@
+/* CANVAS WOMAN — site.js  (no dependencies; every feature degrades to plain links) */
+(() => {
+  'use strict';
+  const d = document;
+  const root = d.documentElement;
+  const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  /* Header: hairline after scrolling; on the home page the wordmark appears once the masthead has gone */
+  const header = d.querySelector('[data-header]');
+  if (header) {
+    const onScroll = () => header.classList.toggle('is-scrolled', window.scrollY > 4);
+    window.addEventListener('scroll', onScroll, { passive: true });
+    onScroll();
+    const mast = d.querySelector('[data-masthead]');
+    if (mast && 'IntersectionObserver' in window) {
+      new IntersectionObserver(([entry]) => header.classList.toggle('show-mark', !entry.isIntersecting),
+        { rootMargin: '-90px 0px 0px 0px' }).observe(mast);
+    } else {
+      header.classList.add('show-mark');
+    }
+  }
+
+  /* Mobile menu */
+  const toggle = d.querySelector('[data-menu-toggle]');
+  const menu = d.getElementById('site-menu');
+  if (toggle && menu && header) {
+    const outside = () => [d.querySelector('main'), d.querySelector('.site-footer'), d.querySelector('.preview-note')].filter(Boolean);
+    const isOpen = () => toggle.getAttribute('aria-expanded') === 'true';
+    let timer;
+    const open = () => {
+      clearTimeout(timer);
+      const bar = header.querySelector('.site-header__bar').getBoundingClientRect();
+      menu.style.setProperty('--menu-top', Math.max(0, Math.round(bar.bottom)) + 'px');
+      menu.hidden = false;
+      requestAnimationFrame(() => menu.classList.add('is-open'));
+      toggle.setAttribute('aria-expanded', 'true');
+      toggle.setAttribute('aria-label', 'Close menu');
+      root.classList.add('menu-open');
+      outside().forEach((el) => { el.inert = true; });
+      const first = menu.querySelector('a');
+      if (first) first.focus({ preventScroll: true });
+    };
+    const close = (restoreFocus) => {
+      menu.classList.remove('is-open');
+      toggle.setAttribute('aria-expanded', 'false');
+      toggle.setAttribute('aria-label', 'Open menu');
+      root.classList.remove('menu-open');
+      outside().forEach((el) => { el.inert = false; });
+      timer = setTimeout(() => { if (!isOpen()) menu.hidden = true; }, reduce ? 0 : 300);
+      if (restoreFocus) toggle.focus();
+    };
+    toggle.addEventListener('click', () => (isOpen() ? close(true) : open()));
+    d.addEventListener('keydown', (e) => { if (e.key === 'Escape' && isOpen()) close(true); });
+    menu.addEventListener('click', (e) => { if (e.target.closest('a')) close(false); });
+    window.matchMedia('(min-width: 1024px)').addEventListener('change', (e) => { if (e.matches && isOpen()) close(false); });
+  }
+
+  /* Unveil artworks that start below the fold */
+  const reveals = d.querySelectorAll('[data-reveal]');
+  if (!reduce && reveals.length && 'IntersectionObserver' in window) {
+    const io = new IntersectionObserver((entries) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) { entry.target.classList.add('is-in'); io.unobserve(entry.target); }
+      });
+    }, { rootMargin: '0px 0px -8% 0px' });
+    reveals.forEach((el) => {
+      if (el.getBoundingClientRect().top < window.innerHeight) return;
+      el.classList.add('will-reveal');
+      io.observe(el);
+    });
+  }
+
+  /* Collection filters: each filter is a real category page; with JS it filters in place */
+  const filterNav = d.querySelector('[data-filters]');
+  const grid = d.querySelector('[data-grid]');
+  if (filterNav && grid && window.history && history.pushState) {
+    const links = Array.from(filterNav.querySelectorAll('a[data-filter]'));
+    const cards = Array.from(grid.querySelectorAll('[data-category]'));
+    const title = d.querySelector('[data-collection-title]');
+    const intro = d.querySelector('[data-collection-intro]');
+    const status = d.querySelector('[data-filter-status]');
+    const empty = d.querySelector('[data-empty]');
+    const apply = (link, push) => {
+      const key = link.dataset.filter;
+      let shown = 0;
+      cards.forEach((card) => {
+        const match = key === 'all' || card.dataset.category === key;
+        card.hidden = !match;
+        if (match) shown += 1;
+      });
+      links.forEach((a) => (a === link ? a.setAttribute('aria-current', 'page') : a.removeAttribute('aria-current')));
+      if (title) title.textContent = link.dataset.heading;
+      if (intro) intro.textContent = link.dataset.intro;
+      d.title = link.dataset.title;
+      if (empty) empty.hidden = shown > 0;
+      if (status) status.textContent = `Showing ${shown} ${shown === 1 ? 'painting' : 'paintings'}`;
+      if (push) history.pushState({ filter: key }, '', link.href);
+    };
+    filterNav.addEventListener('click', (e) => {
+      const link = e.target.closest('a[data-filter]');
+      if (!link || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+      e.preventDefault();
+      if (link.getAttribute('aria-current') !== 'page') apply(link, true);
+    });
+    window.addEventListener('popstate', () => {
+      const link = links.find((a) => new URL(a.href).pathname === location.pathname);
+      if (link) apply(link, false);
+    });
+  }
+
+  /* Painting gallery: swipe carousel on small screens */
+  const gallery = d.querySelector('[data-gallery]');
+  if (gallery) {
+    const track = gallery.querySelector('[data-track]');
+    const items = Array.from(track.children);
+    const count = gallery.querySelector('[data-count]');
+    const pad = () => parseFloat(getComputedStyle(track).paddingLeft) || 0;
+    const scrollable = () => track.scrollWidth > track.clientWidth + 2;
+    const currentIndex = () => {
+      const base = track.getBoundingClientRect().left + pad();
+      let best = 0; let dist = Infinity;
+      items.forEach((it, i) => {
+        const delta = Math.abs(it.getBoundingClientRect().left - base);
+        if (delta < dist) { dist = delta; best = i; }
+      });
+      return best;
+    };
+    const go = (i) => {
+      const target = items[Math.max(0, Math.min(items.length - 1, i))];
+      const left = target.getBoundingClientRect().left - track.getBoundingClientRect().left - pad();
+      track.scrollBy({ left, behavior: reduce ? 'auto' : 'smooth' });
+    };
+    const update = () => { if (count) count.textContent = `${currentIndex() + 1} / ${items.length}`; };
+    track.addEventListener('scroll', () => requestAnimationFrame(update), { passive: true });
+    const prev = gallery.querySelector('[data-prev]');
+    const next = gallery.querySelector('[data-next]');
+    if (prev) prev.addEventListener('click', () => go(currentIndex() - 1));
+    if (next) next.addEventListener('click', () => go(currentIndex() + 1));
+    track.addEventListener('keydown', (e) => {
+      if (!scrollable()) return;
+      if (e.key === 'ArrowRight') { e.preventDefault(); go(currentIndex() + 1); }
+      if (e.key === 'ArrowLeft') { e.preventDefault(); go(currentIndex() - 1); }
+    });
+  }
+
+  /* Lightbox */
+  const box = d.querySelector('[data-lightbox]');
+  const zooms = Array.from(d.querySelectorAll('[data-zoom]'));
+  if (box && zooms.length && typeof box.showModal === 'function') {
+    const img = box.querySelector('[data-lb-img]');
+    const cap = box.querySelector('[data-lb-caption]');
+    const prevBtn = box.querySelector('[data-lb-prev]');
+    const nextBtn = box.querySelector('[data-lb-next]');
+    let at = 0; let opener = null;
+    const show = (i) => {
+      at = (i + zooms.length) % zooms.length;
+      const z = zooms[at];
+      img.src = z.dataset.zoom;
+      img.alt = z.dataset.alt || '';
+      cap.textContent = z.dataset.caption || '';
+    };
+    if (zooms.length < 2) { prevBtn.hidden = true; nextBtn.hidden = true; }
+    zooms.forEach((z, i) => z.addEventListener('click', (e) => {
+      if (e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey) return;
+      e.preventDefault();
+      opener = z; show(i); box.showModal(); root.classList.add('menu-open');
+    }));
+    box.querySelector('[data-lb-close]').addEventListener('click', () => box.close());
+    prevBtn.addEventListener('click', () => show(at - 1));
+    nextBtn.addEventListener('click', () => show(at + 1));
+    box.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowLeft') show(at - 1);
+      if (e.key === 'ArrowRight') show(at + 1);
+    });
+    box.addEventListener('click', (e) => { if (e.target === box) box.close(); });
+    box.addEventListener('close', () => {
+      root.classList.remove('menu-open');
+      if (opener) opener.focus({ preventScroll: true });
+    });
+  }
+
+  /* Floating enquiry: only when no other WhatsApp call-to-action is on screen */
+  const float = d.querySelector('[data-float]');
+  if (float && 'IntersectionObserver' in window) {
+    const onScreen = new Set();
+    const sync = () => float.classList.toggle('is-visible', onScreen.size === 0 && window.scrollY > window.innerHeight * 0.6);
+    const io = new IntersectionObserver((entries) => {
+      entries.forEach((en) => (en.isIntersecting ? onScreen.add(en.target) : onScreen.delete(en.target)));
+      sync();
+    });
+    d.querySelectorAll('[data-float-hide], .site-footer').forEach((el) => io.observe(el));
+    window.addEventListener('scroll', sync, { passive: true });
+  }
+
+  /* Contact: compose a WhatsApp message (nothing is sent from the site itself) */
+  const form = d.querySelector('[data-wa-form]');
+  if (form) {
+    form.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const data = new FormData(form);
+      const name = String(data.get('name') || '').trim();
+      const interest = String(data.get('interest') || '').trim();
+      const note = String(data.get('text') || '').trim();
+      let text = form.dataset.greeting || 'Hi,';
+      if (name) text += ` my name is ${name}.`;
+      if (interest) text += ` I'm interested in ${interest}.`;
+      if (!name && !interest && !note) text += ' I would like to know more about your work.';
+      if (note) text += `\n\n${note}`;
+      const a = d.createElement('a');
+      a.href = `${form.action}?text=${encodeURIComponent(text)}`;
+      a.target = '_blank';
+      a.rel = 'noopener';
+      d.body.appendChild(a);
+      a.click();
+      a.remove();
+    });
+  }
+})();
