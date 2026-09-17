@@ -29,9 +29,12 @@ dist/                    ← the finished website. This is what gets published.
 
 ```bash
 pip install -r requirements.txt
-python3 build.py            # writes dist/
-python3 build.py --serve    # builds, then preview at http://localhost:8000
+python3 build.py                  # DEVELOPMENT build → dist/  (preview bar, every page noindex)
+python3 build.py --serve          # same, then preview at http://localhost:8000
+python3 build.py --production     # PUBLIC build for canvaswoman.com
 ```
+
+**Development vs production.** The default build is for review: it shows the thin preview bar ("Preview — the artworks, titles and prices shown are placeholders…") and marks every page `noindex`. `--production` never renders the bar, makes pages indexable, and **refuses to build while any painting still has `sample = true`** — so neither the bar nor placeholder paintings can reach canvaswoman.com. To hide the bar in development previews too, set `show = false` under `[preview]` in `content/site.toml`. The GitHub Actions workflow already uses `--production`.
 
 The build checks the inventory before writing anything (missing fields, duplicate slugs, unknown categories, missing image files) and stops with a plain list of what to fix.
 
@@ -41,7 +44,8 @@ The build checks the inventory before writing anything (missing fields, duplicat
 2. Put the photographs in it:
    - `primary.jpg` — the whole painting, straight on, cropped exactly to the canvas edge. Long side 2000–3000 px.
    - `detail-1.jpg`, `detail-2.jpg` … (optional) — close-ups of texture and brushwork.
-   - `room-1.jpg` … (optional) — the painting in an interior. These are captioned as interior images on the site, separately from the artwork photos.
+   - `room-1.jpg` … (optional) — the painting in an interior. Captioned as interior images on the site, separately from the artwork photos, and shown at their own proportions.
+   - Any shape works — portrait, landscape, square, or a diptych/multi-panel work photographed together as one image (enter the overall width and height). The site sizes every painting from its own photograph, so nothing is cropped.
 3. Add an entry to `content/paintings.toml` (copy an existing block; every field is explained at the top of that file):
 
 ```toml
@@ -74,9 +78,9 @@ Second paragraph."""
 
 ## Removing the sample data
 
-The 12 entries in `paintings.toml` are placeholders (`sample = true`) with procedurally generated images. They are not Sreeparna Poddar's work. While any entry still has `sample = true`, the build runs in **preview mode**: a thin notice appears at the top of every page, sample listings are tagged "Sample", every page carries `noindex`, and sample paintings are left out of the sitemap.
+The 12 entries in `paintings.toml` are placeholders (`sample = true`) with procedurally generated images. They are not Sreeparna Poddar's work. Sample listings are labelled "Sample listing" and left out of the sitemap, and the production build will not run until they are gone.
 
-To go live: delete the sample entries and their image folders (`azure-reverie`, `saffron-hour`, `quiet-monsoon`, `ivory-tide`, `sandstone-lines`, `terrain-in-gold`, `himalayan-morning`, `fields-after-rain`, `riverside-dusk`, `marigold-pop`, `city-signals`, `pink-monsoon`), add the real paintings, update the four category `cover` images and `home.hero_painting` in `site.toml` to point at real work, then rebuild. Preview mode switches off by itself.
+To go live: delete the sample entries and their image folders (`azure-reverie`, `saffron-hour`, `quiet-monsoon`, `ivory-tide`, `sandstone-lines`, `terrain-in-gold`, `himalayan-morning`, `fields-after-rain`, `riverside-dusk`, `marigold-pop`, `city-signals`, `pink-monsoon`), add the real paintings, point the four category `cover` images and `home.hero_painting` in `site.toml` at real work, then run `python3 build.py --production`.
 
 ## Copy to confirm before launch
 
@@ -86,7 +90,7 @@ The portrait: put a photo in `content/images/artist/` and set `portrait = "artis
 
 ## Publishing on GitHub Pages
 
-**Upload (simplest):** upload the *contents* of `dist/` to the root of the Pages repository. `CNAME` (canvaswoman.com) and `.nojekyll` are already included. All URLs are clean (`/about/`, `/paintings/azure-reverie/`) — no `.html` anywhere.
+**Upload (simplest):** run `python3 build.py --production`, then upload the *contents* of `dist/` to the root of the Pages repository. `CNAME` (canvaswoman.com) and `.nojekyll` are already included. All URLs are clean (`/about/`, `/paintings/azure-reverie/`) — no `.html` anywhere.
 
 **Automatic:** push this whole project to a repository, set Settings → Pages → Source to "GitHub Actions", and `.github/workflows/deploy.yml` builds and publishes on every push to `main`.
 
