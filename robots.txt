@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://canvaswoman.com/sitemap.xml
+Sitemap: https://norvixhq.github.io/canvaswoman.com/sitemap.xml
