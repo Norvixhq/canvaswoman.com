@@ -192,6 +192,17 @@
     window.addEventListener('scroll', sync, { passive: true });
   }
 
+  /* Conversion events. Every enquiry control carries data-event (and data-artwork where
+     relevant). Forwarded to GA4 when a measurement ID is configured in site.toml; queued on
+     dataLayer otherwise, so nothing is lost and nothing is required. */
+  d.addEventListener('click', (e) => {
+    const el = e.target.closest('[data-event]');
+    if (!el) return;
+    const params = el.dataset.artwork ? { artwork: el.dataset.artwork } : {};
+    if (typeof window.gtag === 'function') window.gtag('event', el.dataset.event, params);
+    else (window.dataLayer = window.dataLayer || []).push(Object.assign({ event: el.dataset.event }, params));
+  }, true);
+
   /* Contact: compose a WhatsApp message (nothing is sent from the site itself) */
   const form = d.querySelector('[data-wa-form]');
   if (form) {

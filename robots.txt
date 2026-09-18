@@ -1,3 +1,5 @@
+# Canvas Woman — everything public is open to search engines, including
+# the CSS, JavaScript and artwork images needed to render pages properly.
 User-agent: *
 Allow: /
 

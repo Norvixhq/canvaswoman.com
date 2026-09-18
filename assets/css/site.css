@@ -287,6 +287,7 @@ html.menu-open{overflow:hidden}
 .artist .portrait__mat{height:min(80svh,820px);max-width:100%}
 .artist__text{grid-column:9 / 13}
 .artist__kicker{font-size:.875rem;color:var(--taupe);margin:0 0 18px}
+.artist__name span{display:block}
 .artist__name{font-size:clamp(3rem,5.6vw,5.75rem);line-height:.94;font-weight:300;letter-spacing:-.015em;margin:0 0 clamp(28px,3.5vw,48px)}
 .artist__lead{font-family:var(--serif);font-weight:350;font-size:clamp(1.3rem,1.8vw,1.65rem);line-height:1.35;margin:0 0 20px}
 .artist__body{font-size:1rem;line-height:1.75}
@@ -508,6 +509,7 @@ html.menu-open{overflow:hidden}
 .customise__foot{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:24px 40px;margin-top:clamp(56px,7vw,96px);padding-top:32px;border-top:1px solid var(--rule)}
 .price-lines{display:grid;gap:4px;margin:0}
 .price-lines span:first-child{font-family:var(--serif);font-size:1.5rem}
+.price-lines__note{color:var(--taupe);font-size:.875rem;max-width:44ch;margin-top:6px}
 @media (max-width:1023px){.options{grid-template-columns:repeat(2,minmax(0,1fr))}.frames__list{grid-template-columns:repeat(4,minmax(0,1fr))}}
 @media (max-width:699px){.customise__head{grid-template-columns:minmax(0,1fr)}.frames__list{grid-template-columns:repeat(3,minmax(0,1fr))}}
 @media (max-width:559px){.options{grid-template-columns:minmax(0,1fr)}.customise__foot .btn{width:100%}}
@@ -567,6 +569,7 @@ html.menu-open{overflow:hidden}
 .profile .portrait img{width:min(100%,calc(min(100svh - var(--header-h) - 64px,940px) * var(--r)))}
 .profile .portrait__mat{height:min(calc(100svh - var(--header-h) - 64px),940px);max-width:100%}
 .profile__kicker{font-size:.875rem;color:var(--taupe);margin:0 0 18px}
+.profile__name span{display:block}
 .profile__name{font-size:clamp(3rem,5.4vw,5.75rem);line-height:.94;font-weight:300;letter-spacing:-.015em;margin:0 0 clamp(32px,4vw,56px)}
 .profile__lead{font-family:var(--serif);font-size:clamp(1.45rem,2.1vw,1.95rem);line-height:1.3;font-weight:350;margin:0 0 32px}
 .profile__bio p{font-size:1.0625rem;line-height:1.8;max-width:40em}
@@ -644,7 +647,7 @@ html.menu-open{overflow:hidden}
 @media (max-width:599px){
   body{font-size:1rem}
   .link{display:inline-block;padding-block:9px}
-  .work__title,.card__title,.index__name,.salon__label .art-title{padding-block:6px}
+  .work__title,.card__title,.index__name,.salon__label .art-title{padding-block:9px}
   .actions .btn,.compose .btn,.contact__main .btn--large{flex:1 1 100%;width:100%}
 }
 
