@@ -153,6 +153,7 @@
     const nextBtn = box.querySelector('[data-lb-next]');
     let at = 0; let opener = null;
     const show = (i) => {
+      if (typeof resetZoom === 'function') resetZoom();
       at = (i + zooms.length) % zooms.length;
       const z = zooms[at];
       img.src = z.dataset.zoom;
@@ -165,6 +166,54 @@
       e.preventDefault();
       opener = z; show(i); box.showModal(); root.classList.add('menu-open');
     }));
+    /* Zoom into the surface. Texture, impasto and brushwork are the product here, so the
+       viewer can magnify to the photograph's own resolution and drag around the canvas. */
+    const hint = box.querySelector('[data-lb-hint]');
+    let zoom = 1, ox = 0, oy = 0, dragging = false, sx = 0, sy = 0, moved = false;
+    const apply = () => { img.style.transform = `translate(${ox}px, ${oy}px) scale(${zoom})`; };
+    const clampPan = () => {
+      const limX = Math.max(0, (img.clientWidth * zoom - Math.min(img.clientWidth * zoom, window.innerWidth)) / 2);
+      const limY = Math.max(0, (img.clientHeight * zoom - Math.min(img.clientHeight * zoom, window.innerHeight)) / 2);
+      ox = Math.max(-limX, Math.min(limX, ox));
+      oy = Math.max(-limY, Math.min(limY, oy));
+    };
+    const resetZoom = () => {
+      zoom = 1; ox = 0; oy = 0; img.style.transform = '';
+      box.classList.remove('is-zoomed');
+      if (hint) hint.hidden = false;
+    };
+    img.addEventListener('click', (e) => {
+      e.stopPropagation();
+      if (moved) { moved = false; return; }
+      if (zoom === 1) {
+        const r = img.getBoundingClientRect();
+        if (!r.width) return;
+        zoom = Math.min(3.2, Math.max(1.9, img.naturalWidth / r.width));
+        ox = -(e.clientX - (r.left + r.width / 2)) * (zoom - 1);
+        oy = -(e.clientY - (r.top + r.height / 2)) * (zoom - 1);
+        clampPan(); apply();
+        box.classList.add('is-zoomed');
+        if (hint) hint.hidden = true;
+      } else resetZoom();
+    });
+    img.addEventListener('pointerdown', (e) => {
+      if (zoom === 1) return;
+      e.preventDefault();
+      dragging = true; moved = false;
+      sx = e.clientX - ox; sy = e.clientY - oy;
+    });
+    /* Tracked on the document, not the image: the pointer regularly leaves the artwork
+       mid-drag, and the pan should keep following it. */
+    d.addEventListener('pointermove', (e) => {
+      if (!dragging) return;
+      const nx = e.clientX - sx, ny = e.clientY - sy;
+      if (Math.abs(nx - ox) + Math.abs(ny - oy) > 2) moved = true;
+      ox = nx; oy = ny;
+      clampPan(); apply();
+    });
+    ['pointerup', 'pointercancel', 'pointerleave'].forEach(
+      (ev) => d.addEventListener(ev, () => { dragging = false; }));
+
     box.querySelector('[data-lb-close]').addEventListener('click', () => box.close());
     prevBtn.addEventListener('click', () => show(at - 1));
     nextBtn.addEventListener('click', () => show(at + 1));
@@ -174,6 +223,7 @@
     });
     box.addEventListener('click', (e) => { if (e.target === box) box.close(); });
     box.addEventListener('close', () => {
+      resetZoom();
       root.classList.remove('menu-open');
       if (opener) opener.focus({ preventScroll: true });
     });
@@ -202,6 +252,26 @@
     if (typeof window.gtag === 'function') window.gtag('event', el.dataset.event, params);
     else (window.dataLayer = window.dataLayer || []).push(Object.assign({ event: el.dataset.event }, params));
   }, true);
+
+  /* Share a painting. Uses the device's own share sheet where it exists — the quickest
+     route from "look at this" to a WhatsApp message — and copies the link otherwise.
+     Hidden until this runs, so it never sits there as a control that does nothing. */
+  const share = d.querySelector('[data-share]');
+  if (share && (navigator.share || navigator.clipboard)) {
+    share.hidden = false;
+    const label = share.textContent;
+    share.addEventListener('click', async () => {
+      const data = { title: share.dataset.shareTitle, text: share.dataset.shareTitle, url: location.href };
+      try {
+        if (navigator.share) await navigator.share(data);
+        else {
+          await navigator.clipboard.writeText(location.href);
+          share.textContent = 'Link copied';
+          setTimeout(() => { share.textContent = label; }, 2400);
+        }
+      } catch (err) { /* the person dismissed the sheet — nothing to do */ }
+    });
+  }
 
   /* Contact: compose a WhatsApp message (nothing is sent from the site itself) */
   const form = d.querySelector('[data-wa-form]');

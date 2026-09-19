@@ -19,6 +19,10 @@
 }
 @media (max-width:1023px){:root{--header-h:62px}}
 
+@view-transition{navigation:auto}
+::view-transition-group(*){animation-duration:.42s;animation-timing-function:cubic-bezier(.2,.7,.2,1)}
+@media (prefers-reduced-motion:reduce){@view-transition{navigation:none}}
+
 *,*::before,*::after{box-sizing:border-box}
 html{-webkit-text-size-adjust:100%;text-size-adjust:100%;scroll-padding-top:calc(var(--header-h) + 20px)}
 body{margin:0;background:var(--ivory);color:var(--ink);font-family:var(--sans);font-size:1.0625rem;line-height:1.65;-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;text-rendering:optimizeLegibility}
@@ -55,20 +59,32 @@ main:focus{outline:none}
 .wall-label{display:flex;flex-direction:column;gap:1px;margin-top:20px;font-size:.8125rem;line-height:1.5;color:var(--taupe);width:0;min-width:100%}
 .wall-label .art-title{font-size:1.125rem;color:var(--ink)}
 
+.lot__specs dd,.lot__price-value,.lot__ref,.card__meta,.work__label,.glance dd,.gallery__count,
+.filters__count,.index__count,.cat__count,.ways__count,.price-lines,.sd-label,.salon__meta,
+.contact__number,.reach__note{font-variant-numeric:tabular-nums lining-nums}
+
 /* buttons & links */
 .actions{display:flex;flex-wrap:wrap;align-items:center;gap:14px 28px}
-.btn{display:inline-flex;align-items:center;justify-content:center;gap:.75em;min-height:52px;padding:.85em 1.6em;border:1px solid var(--ink);background:var(--ink);color:var(--ivory);font:500 .8125rem/1.25 var(--sans);letter-spacing:.11em;text-transform:uppercase;text-decoration:none;text-align:center;cursor:pointer;transition:background-color .35s var(--ease),color .35s var(--ease),border-color .35s var(--ease)}
+.btn{position:relative;isolation:isolate;overflow:hidden;display:inline-flex;align-items:center;justify-content:center;gap:.75em;min-height:52px;padding:.85em 1.6em;border:1px solid var(--ink);background:var(--ink);color:var(--ivory);font:500 .8125rem/1.25 var(--sans);letter-spacing:.11em;text-transform:uppercase;text-decoration:none;text-align:center;cursor:pointer;transition:color .4s var(--ease),border-color .4s var(--ease),transform .18s var(--ease)}
+.btn::before{content:"";position:absolute;inset:0;z-index:-1;background:var(--ink-2);transform:scaleY(0);transform-origin:bottom;transition:transform .45s var(--ease)}
+.btn:hover::before,.btn:focus-visible::before{transform:scaleY(1)}
+.btn:active{transform:translateY(1px)}
 .btn .icon{width:18px;height:18px}
-.btn:hover{background:var(--ink-2);border-color:var(--ink-2)}
 .btn--ghost{background:transparent;color:var(--ink)}
-.btn--ghost:hover{background:var(--ink);color:var(--ivory);border-color:var(--ink)}
+.btn--ghost::before{background:var(--ink)}
+.btn--ghost:hover,.btn--ghost:focus-visible{color:var(--ivory)}
 .btn--block{display:flex;width:100%}
 .btn--large{min-height:60px;padding-inline:2.2em;font-size:.875rem}
 .btn--light{background:var(--ivory);color:var(--ink);border-color:var(--ivory)}
-.btn--light:hover{background:#fff;border-color:#fff}
+.btn--light::before{background:#fff}
 .link{font-weight:500;font-size:.9375rem;text-decoration:underline;text-decoration-thickness:1px;text-decoration-color:var(--line);text-underline-offset:.4em;transition:text-decoration-color .3s}
 .link:hover{text-decoration-color:currentColor}
 .link--light{color:var(--on-umber);text-decoration-color:rgba(245,240,231,.4)}
+
+/* Inline preview. A 24px version of each photograph, embedded in the page, fills the
+   frame the moment the HTML arrives — so artwork resolves into focus instead of
+   painting down the page as the bytes land. The real image covers it once decoded. */
+img[data-lqip]{background-image:var(--lqip);background-size:100% 100%;background-repeat:no-repeat}
 
 /* development preview bar (never rendered by --production) */
 .preview-note{background:var(--plaster);border-bottom:1px solid var(--rule);color:var(--taupe);font-size:.8125rem;line-height:1.4;text-align:center;padding:8px var(--gutter)}
@@ -87,7 +103,9 @@ main:focus{outline:none}
 .site-nav a[aria-current="page"]::after{transform:scaleX(1);opacity:1}
 .site-header__actions{display:flex;align-items:center;gap:2px;margin-left:clamp(4px,1.2vw,16px)}
 .icon-btn{display:inline-grid;place-items:center;width:44px;height:44px;border:0;background:none;padding:0;color:var(--ink);cursor:pointer;transition:opacity .3s}
-.icon-btn:hover{opacity:.6}
+.icon-btn svg{transition:transform .35s var(--ease)}
+.icon-btn:hover{opacity:.62}
+.icon-btn:hover svg{transform:translateY(-1px)}
 .menu-btn{display:none;width:44px;height:44px;border:0;background:none;padding:0;cursor:pointer;position:relative;margin-right:-10px}
 .menu-btn span{position:absolute;left:11px;right:11px;height:1.5px;background:var(--ink);transition:transform .35s var(--ease)}
 .menu-btn span:first-child{top:18px}
@@ -517,6 +535,9 @@ html.menu-open{overflow:hidden}
 /* floating enquiry */
 .float-enquire{position:fixed;right:clamp(16px,2.5vw,32px);bottom:clamp(16px,2.5vw,32px);z-index:40;display:inline-flex;align-items:center;gap:10px;min-height:52px;padding:0 20px;background:var(--ink);color:var(--ivory);text-decoration:none;font:500 .8125rem/1 var(--sans);letter-spacing:.11em;text-transform:uppercase;box-shadow:0 12px 30px -12px rgba(0,0,0,.45);opacity:0;visibility:hidden;transform:translateY(12px);transition:opacity .35s var(--ease),transform .35s var(--ease),visibility .35s}
 .float-enquire .icon{width:18px;height:18px}
+.float-enquire{isolation:isolate;overflow:hidden}
+.float-enquire::before{content:"";position:absolute;inset:0;z-index:-1;background:var(--ink-2);transform:scaleY(0);transform-origin:bottom;transition:transform .45s var(--ease)}
+.float-enquire:hover::before{transform:scaleY(1)}
 .float-enquire.is-visible{opacity:1;visibility:visible;transform:none}
 @media (max-width:559px){.float-enquire{left:12px;right:12px;bottom:12px;justify-content:center}}
 
@@ -533,6 +554,16 @@ html.menu-open{overflow:hidden}
 .lightbox__nav--prev{left:12px}
 .lightbox__nav--next{right:12px}
 @media (max-width:599px){.lightbox__figure{padding:68px 12px 76px}.lightbox__figure img{max-width:calc(100vw - 24px);max-height:calc(100vh - 180px)}.lightbox__nav{top:auto;bottom:14px;transform:none}}
+
+/* magnify the surface: brushwork and impasto are the thing being sold */
+.lightbox__figure img{transition:transform .35s var(--ease);cursor:zoom-in;touch-action:none;will-change:transform}
+.lightbox.is-zoomed .lightbox__figure{overflow:hidden}
+.lightbox.is-zoomed .lightbox__figure img{cursor:grab;transition:none}
+.lightbox.is-zoomed .lightbox__figure img:active{cursor:grabbing}
+.lightbox__hint{margin:0;font-size:.8125rem;color:var(--taupe)}
+.lightbox.is-zoomed .lightbox__nav,.lightbox.is-zoomed .lightbox__figure figcaption{opacity:0;pointer-events:none}
+.lot__share{display:inline-flex;align-items:center;min-height:44px;margin-top:10px;padding:6px 0;border:0;background:none;cursor:pointer;font:500 .875rem/1.4 var(--sans);color:var(--taupe);text-decoration:underline;text-decoration-color:var(--line);text-underline-offset:.4em;transition:color .3s}
+.lot__share:hover{color:var(--ink)}
 
 /* commissions */
 .page-hero{display:grid;grid-template-columns:minmax(0,6fr) minmax(0,5fr);gap:clamp(40px,6vw,96px);align-items:center;padding-top:clamp(28px,4vw,56px);padding-bottom:var(--section)}
@@ -580,6 +611,14 @@ html.menu-open{overflow:hidden}
   .profile .portrait img{width:min(100%,calc(78svh * var(--r)))}
   .profile .portrait__mat{height:auto;width:100%}
 }
+
+/* about: factual summary beside the biography */
+.glance{margin:clamp(40px,5vw,64px) 0 0;border-top:1px solid var(--ink)}
+.glance div{display:grid;grid-template-columns:minmax(0,7.5em) minmax(0,1fr);gap:8px 28px;padding:15px 0;border-bottom:1px solid var(--rule)}
+.glance dt{font-size:.8125rem;color:var(--taupe)}
+.glance dd{margin:0;font-size:.9688rem}
+.profile .actions{margin-top:clamp(36px,4vw,52px)}
+@media (max-width:599px){.glance div{grid-template-columns:minmax(0,1fr);gap:2px;padding:14px 0}}
 
 /* the art — opening spread, essay, plates */
 .spread{container-type:inline-size;display:grid;grid-template-columns:minmax(0,7fr) minmax(0,5fr);gap:clamp(40px,6vw,104px);align-items:center;padding-top:clamp(20px,3vw,40px);padding-bottom:var(--section)}
@@ -639,10 +678,51 @@ html.menu-open{overflow:hidden}
 .contact__h{font-family:var(--sans);font-size:.8125rem;font-weight:600;color:var(--taupe);margin-bottom:12px}
 @media (max-width:899px){.contact{grid-template-columns:minmax(0,1fr)}}
 
+.tearsheet{display:none}
+
+/* contact: one card per way of reaching her, the studio and personal accounts named apart */
+.channels{padding-bottom:clamp(48px,6vw,88px)}
+.channel-list{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:clamp(20px,2.4vw,36px)}
+.channel{display:flex;flex-direction:column;align-items:flex-start;border-top:1px solid var(--ink);padding-top:22px}
+.channel--primary{grid-column:span 1}
+.channel__mark{display:block;margin-bottom:18px;color:var(--ink)}
+.channel__mark .icon{width:26px;height:26px}
+.channel__label{font-family:var(--sans);font-size:.8125rem;font-weight:600;letter-spacing:.02em;color:var(--taupe);margin:0 0 6px}
+.channel__value{font-family:var(--serif);font-size:clamp(1.25rem,1.7vw,1.6rem);line-height:1.15;margin:0 0 10px}
+.channel__note{font-size:.9063rem;color:var(--taupe);margin:0 0 24px;flex:1}
+.channel .btn{margin-top:auto}
+.contact__list li{padding:9px 0;border-bottom:1px solid var(--rule);font-size:.9375rem}
+.contact__list li:first-child{border-top:1px solid var(--rule)}
+.contact__aside .contact__block p{font-size:.9375rem}
+@media (max-width:1023px){.channel-list{grid-template-columns:repeat(2,minmax(0,1fr));gap:36px 24px}}
+@media (max-width:559px){.channel-list{grid-template-columns:minmax(0,1fr)}}
+
+/* the art: how the work is made */
+.tech__list{border-top:1px solid var(--ink)}
+.tech{display:grid;grid-template-columns:minmax(0,4fr) minmax(0,7fr);gap:24px clamp(32px,5vw,88px);align-items:start;padding:clamp(28px,3.4vw,44px) 0;border-bottom:1px solid var(--rule)}
+.tech__name{font-size:clamp(1.35rem,2vw,1.85rem);margin-bottom:10px}
+.tech__note{margin:0;color:var(--taupe);font-size:.9688rem;max-width:40ch}
+.tech__works{display:flex;flex-wrap:wrap;gap:clamp(16px,2vw,28px)}
+.tech__works a{display:block;text-decoration:none;width:clamp(96px,13vw,168px)}
+.tech__works img{width:100%;height:auto;aspect-ratio:var(--r);transition:transform .5s var(--ease),box-shadow .5s var(--ease)}
+.tech__works a:hover img{transform:translateY(-3px);box-shadow:var(--hang-lift)}
+.tech__caption{display:block;margin-top:10px;font-size:.875rem;line-height:1.3}
+@media (max-width:899px){.tech{grid-template-columns:minmax(0,1fr)}}
+
+/* about: her own words, set as a pull quote */
+.pullquote{margin:clamp(40px,5vw,64px) 0 0;padding-top:clamp(28px,3vw,40px);border-top:1px solid var(--rule)}
+.pullquote blockquote{margin:0}
+.pullquote p{font-family:var(--serif);font-style:italic;font-weight:300;font-size:clamp(1.5rem,2.4vw,2.1rem);line-height:1.25;margin:0;max-width:20ch;text-wrap:balance}
+.pullquote figcaption{margin-top:20px}
+
 /* 404 */
 .notfound{padding-block:clamp(80px,12vw,180px)}
 .notfound h1{margin:12px 0 20px}
 .notfound .actions{margin-top:36px}
+
+/* Narrow phones: the header keeps the studio account, Facebook and WhatsApp.
+   Sreeparna's personal account stays one tap away in the menu, where both are named. */
+@media (max-width:479px){.site-header__actions .icon-btn--personal{display:none}}
 
 @media (max-width:599px){
   body{font-size:1rem}
@@ -669,3 +749,33 @@ html.menu-open{overflow:hidden}
   .float-enquire{font-size:.875rem}
 }
 @media (prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important;scroll-behavior:auto!important}}
+
+/* ---------- print: an artwork page prints as a gallery tear sheet ---------- */
+@media print{
+  @page{margin:15mm}
+  *{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  body{background:#fff;color:#000;font-size:10.5pt;line-height:1.5}
+  .site-header,.site-footer,.preview-note,.float-enquire,.skip-link,.crumbs,.lightbox,
+  .lot__actions,.lot__hint,.lot__share,.gallery__controls,.scale,.customise,.related,
+  .closing,.prompt,.reach,.about-works,.section-foot,.filters,.empty{display:none!important}
+  main{padding:0}
+  .wrap{max-width:none;padding-inline:0}
+  .tearsheet{display:block;text-align:center;font-family:var(--serif);font-size:8.5pt;letter-spacing:.14em;color:#333}
+  .tearsheet--top{padding-bottom:5mm;border-bottom:.4pt solid #999;margin:0 0 8mm}
+  .tearsheet--foot{margin:10mm 0 0;padding-top:4mm;border-top:.4pt solid #999;letter-spacing:.06em}
+  .painting,.painting__grid{display:block;padding:0}
+  .gallery{margin:0}
+  .gallery__track{display:block;overflow:visible}
+  .gallery__item--detail,.gallery__item--room{display:none}
+  .gallery__item--art img{width:auto;max-width:100%;max-height:115mm;margin:0 auto;box-shadow:none;aspect-ratio:auto}
+  .gallery__item figcaption{display:none}
+  .lot{margin-top:9mm;break-inside:avoid}
+  .lot__title{font-size:21pt;margin:0 0 3pt}
+  .lot__artist{margin:0 0 6mm}
+  .lot__price-value{font-size:15pt}
+  .lot__specs{border-color:#aaa;gap:7pt;margin:6mm 0}
+  .lot__specs div{border:0}
+  .lot__desc p{max-width:none}
+  .card-grid,.salon,.cats,.works__pair{display:block}
+  a[href]{text-decoration:none;color:#000}
+}
