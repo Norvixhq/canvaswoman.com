@@ -84,7 +84,14 @@ main:focus{outline:none}
 /* Inline preview. A 24px version of each photograph, embedded in the page, fills the
    frame the moment the HTML arrives — so artwork resolves into focus instead of
    painting down the page as the bytes land. The real image covers it once decoded. */
-img[data-lqip]{background-image:var(--lqip);background-size:100% 100%;background-repeat:no-repeat}
+picture{display:block}
+picture[data-lqip]{background-image:var(--lqip);background-size:100% 100%;background-repeat:no-repeat}
+/* Images below the fold are held back until fully decoded, then cross-faded in — so a
+   half-downloaded photograph never paints down the page. The preview underneath means
+   the frame is never empty. Only applies when JavaScript ran; without it, images show
+   immediately as normal. The hero is excluded: it is preloaded and arrives whole. */
+.js picture[data-lqip] > img[loading="lazy"]{transition:opacity .3s var(--ease)}
+.js picture[data-lqip] > img[loading="lazy"]:not(.is-ready){opacity:0}
 
 /* development preview bar (never rendered by --production) */
 .preview-note{background:var(--plaster);border-bottom:1px solid var(--rule);color:var(--taupe);font-size:.8125rem;line-height:1.4;text-align:center;padding:8px var(--gutter)}
@@ -368,6 +375,35 @@ html.menu-open{overflow:hidden}
   .closing__drawing{order:3;width:100%;max-width:440px}
 }
 @media (max-width:599px){.closing__actions .btn,.measure__actions .btn{width:100%}.measure__actions{justify-items:stretch}}
+
+/* home: how the work is made, and the commission process in brief */
+.hand__list{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:clamp(18px,2.4vw,36px)}
+.hand__list a{display:block;text-decoration:none}
+.hand__list img{width:100%;height:auto;aspect-ratio:var(--r);transition:transform .5s var(--ease),box-shadow .5s var(--ease)}
+.hand__list a:hover img{transform:translateY(-3px);box-shadow:var(--hang-lift)}
+.hand__name{display:block;margin-top:14px;font-family:var(--serif);font-size:clamp(1rem,1.25vw,1.2rem);line-height:1.25}
+.brief__list{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:clamp(18px,2.4vw,36px);border-top:1px solid var(--ink)}
+.brief__list li{padding-top:18px}
+.brief__n{display:block;font-family:var(--serif);font-weight:300;font-size:clamp(1.4rem,2vw,1.9rem);line-height:1;color:var(--taupe);margin-bottom:10px}
+.brief__t{font-size:.9688rem;line-height:1.4}
+@media (max-width:899px){.hand__list{grid-template-columns:repeat(3,minmax(0,1fr));gap:28px 18px}.brief__list{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media (max-width:559px){.hand__list{grid-template-columns:repeat(2,minmax(0,1fr))}.brief__list{grid-template-columns:minmax(0,1fr);gap:0}.brief__list li{padding:14px 0;border-bottom:1px solid var(--rule)}}
+
+/* commissions: what you can shape, size guidance */
+.shape__list{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:clamp(28px,3.4vw,56px)}
+.shape__list li{display:grid;grid-template-columns:56px minmax(0,1fr);gap:20px;align-items:start;border-top:1px solid var(--ink);padding-top:22px}
+.shape__glyph{display:block;padding-top:4px;color:var(--ink)}
+.shape__glyph svg{width:56px;height:42px;overflow:visible}
+.shape__glyph rect,.shape__glyph line{fill:none;stroke:currentColor;stroke-width:1;vector-effect:non-scaling-stroke}
+.shape__glyph .g-dim line{stroke:var(--brass)}
+.shape__list h3{font-size:clamp(1.2rem,1.5vw,1.4rem);margin-bottom:8px}
+.shape__list p{margin:0;font-size:.9375rem;color:var(--taupe)}
+.guide__list{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:clamp(32px,4vw,64px)}
+.guide{display:flex;flex-direction:column}
+.guide__art{margin-bottom:clamp(20px,2.4vw,32px)}
+.guide__label{font-size:clamp(1.2rem,1.5vw,1.45rem);margin-bottom:8px}
+.guide__note{margin:0;color:var(--taupe);font-size:.9375rem}
+@media (max-width:899px){.shape__list,.guide__list{grid-template-columns:minmax(0,1fr);gap:32px}}
 
 /* measured drawings — the one place brass is used */
 .scale-drawing{position:relative;margin:0;width:100%;color:var(--ink);--dim:var(--brass);--ext:var(--brass-line);--label-bg:var(--ivory)}

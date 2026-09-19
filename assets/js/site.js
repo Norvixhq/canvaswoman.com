@@ -70,6 +70,14 @@
     });
   }
 
+  /* Reveal each photograph only once it has fully decoded (see the CSS note). */
+  d.querySelectorAll('picture[data-lqip] > img[loading="lazy"]').forEach((im) => {
+    const ready = () => im.classList.add('is-ready');
+    if (im.complete && im.naturalWidth) { ready(); return; }
+    im.addEventListener('load', ready, { once: true });
+    im.addEventListener('error', ready, { once: true });
+  });
+
   /* Collection filters: each filter is a real category page; with JS it filters in place */
   const filterNav = d.querySelector('[data-filters]');
   const grid = d.querySelector('[data-grid]');
