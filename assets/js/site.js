@@ -24,7 +24,14 @@
   const toggle = d.querySelector('[data-menu-toggle]');
   const menu = d.getElementById('site-menu');
   if (toggle && menu && header) {
-    const outside = () => [d.querySelector('main'), d.querySelector('.site-footer'), d.querySelector('.preview-note')].filter(Boolean);
+    /* Everything the open menu covers is made inert, so a keyboard or screen-reader user
+       cannot tab behind the overlay. The skip link belongs in here too: it sits outside
+       main, so it stayed reachable and would have sent focus into the inert page. The
+       header bar itself is deliberately left out — its icons stay visible above the open
+       menu, so they are still genuinely usable. */
+    const outside = () => [d.querySelector('main'), d.querySelector('.site-footer'),
+      d.querySelector('.preview-note'), d.querySelector('.skip-link'),
+      d.querySelector('.float-enquire')].filter(Boolean);
     const isOpen = () => toggle.getAttribute('aria-expanded') === 'true';
     let timer;
     const open = () => {
@@ -305,13 +312,28 @@
       if (interest) text += ` I'm interested in ${interest}.`;
       if (!name && !interest && !note) text += ' I would like to know more about your work.';
       if (note) text += `\n\n${note}`;
+      const url = `${form.action}?text=${encodeURIComponent(text)}`;
       const a = d.createElement('a');
-      a.href = `${form.action}?text=${encodeURIComponent(text)}`;
+      a.href = url;
       a.target = '_blank';
       a.rel = 'noopener';
       d.body.appendChild(a);
       a.click();
       a.remove();
+      /* Submitting opens WhatsApp in another tab, which is silent — nothing on this page
+         changes, so a screen reader announces nothing and anyone whose pop-up blocker
+         caught the tab is left guessing. This says what happened, and carries the link
+         so the message is never lost. */
+      const status = form.querySelector('[data-wa-status]');
+      if (status) {
+        status.textContent = 'Opening WhatsApp with your message. ';
+        const link = d.createElement('a');
+        link.href = url;
+        link.target = '_blank';
+        link.rel = 'noopener';
+        link.textContent = 'If nothing opened, continue in WhatsApp here.';
+        status.appendChild(link);
+      }
     });
   }
 })();
