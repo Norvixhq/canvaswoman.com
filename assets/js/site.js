@@ -70,13 +70,23 @@
     });
   }
 
-  /* Reveal each photograph only once it has fully decoded (see the CSS note). */
-  d.querySelectorAll('picture[data-lqip] > img[loading="lazy"]').forEach((im) => {
+  /* Reveal each photograph once it has fully decoded (see the CSS note). */
+  const faders = d.querySelectorAll('picture[data-fade] > img');
+  faders.forEach((im) => {
     const ready = () => im.classList.add('is-ready');
     if (im.complete && im.naturalWidth) { ready(); return; }
     im.addEventListener('load', ready, { once: true });
     im.addEventListener('error', ready, { once: true });
   });
+  /* Safety net: an image restored from cache or laid out at a new breakpoint can finish
+     without firing load, so sweep for finished images whenever the layout changes. No
+     image may stay invisible because its reveal event was missed. */
+  const sweep = () => faders.forEach((im) => {
+    if (im.complete && !im.classList.contains('is-ready')) im.classList.add('is-ready');
+  });
+  addEventListener('resize', sweep, { passive: true });
+  addEventListener('pageshow', sweep);
+  addEventListener('load', sweep);
 
   /* Collection filters: each filter is a real category page; with JS it filters in place */
   const filterNav = d.querySelector('[data-filters]');

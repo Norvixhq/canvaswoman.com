@@ -66,32 +66,34 @@ main:focus{outline:none}
 /* buttons & links */
 .actions{display:flex;flex-wrap:wrap;align-items:center;gap:14px 28px}
 .btn{position:relative;isolation:isolate;overflow:hidden;display:inline-flex;align-items:center;justify-content:center;gap:.75em;min-height:52px;padding:.85em 1.6em;border:1px solid var(--ink);background:var(--ink);color:var(--ivory);font:500 .8125rem/1.25 var(--sans);letter-spacing:.11em;text-transform:uppercase;text-decoration:none;text-align:center;cursor:pointer;transition:color .4s var(--ease),border-color .4s var(--ease),transform .18s var(--ease)}
-.btn::before{content:"";position:absolute;inset:0;z-index:-1;background:var(--ink-2);transform:scaleY(0);transform-origin:bottom;transition:transform .45s var(--ease)}
+/* Each button inverts on hover, and the direction of the sweep follows the button: a
+   dark button lightens from the top down, a light one darkens from the bottom up. Two
+   adjacent buttons therefore wipe towards each other rather than in step. */
+.btn::before{content:"";position:absolute;inset:0;z-index:-1;background:var(--ivory);transform:scaleY(0);transform-origin:top;transition:transform .45s var(--ease)}
 .btn:hover::before,.btn:focus-visible::before{transform:scaleY(1)}
+.btn:hover,.btn:focus-visible{color:var(--ink)}
 .btn:active{transform:translateY(1px)}
 .btn .icon{width:18px;height:18px}
 .btn--ghost{background:transparent;color:var(--ink)}
-.btn--ghost::before{background:var(--ink)}
+.btn--ghost::before{background:var(--ink);transform-origin:bottom}
 .btn--ghost:hover,.btn--ghost:focus-visible{color:var(--ivory)}
 .btn--block{display:flex;width:100%}
 .btn--large{min-height:60px;padding-inline:2.2em;font-size:.875rem}
+/* Light button on a dark band: light by default, so it sweeps dark from the bottom up. */
 .btn--light{background:var(--ivory);color:var(--ink);border-color:var(--ivory)}
-.btn--light::before{background:#fff}
+.btn--light::before{background:var(--ink);transform-origin:bottom}
+.btn--light:hover,.btn--light:focus-visible{color:var(--ivory)}
 .link{font-weight:500;font-size:.9375rem;text-decoration:underline;text-decoration-thickness:1px;text-decoration-color:var(--line);text-underline-offset:.4em;transition:text-decoration-color .3s}
 .link:hover{text-decoration-color:currentColor}
 .link--light{color:var(--on-umber);text-decoration-color:rgba(245,240,231,.4)}
 
-/* Inline preview. A 24px version of each photograph, embedded in the page, fills the
-   frame the moment the HTML arrives — so artwork resolves into focus instead of
-   painting down the page as the bytes land. The real image covers it once decoded. */
-picture{display:block}
-picture[data-lqip]{background-image:var(--lqip);background-size:100% 100%;background-repeat:no-repeat}
-/* Images below the fold are held back until fully decoded, then cross-faded in — so a
-   half-downloaded photograph never paints down the page. The preview underneath means
-   the frame is never empty. Only applies when JavaScript ran; without it, images show
-   immediately as normal. The hero is excluded: it is preloaded and arrives whole. */
-.js picture[data-lqip] > img[loading="lazy"]{transition:opacity .3s var(--ease)}
-.js picture[data-lqip] > img[loading="lazy"]:not(.is-ready){opacity:0}
+/* Artwork is held back until the browser has fully decoded it, then revealed — so a
+   half-downloaded photograph never paints its way down the page. The frame is already
+   reserved by the image's aspect ratio, so nothing moves. Below the fold it fades in;
+   above the fold it appears the instant it is ready, to keep the page fast. Applies
+   only when JavaScript ran — without it, images show immediately as normal. */
+.js picture[data-fade] > img:not(.is-ready){opacity:0}
+.js picture[data-fade] > img:not([fetchpriority="high"]){transition:opacity .3s var(--ease)}
 
 /* development preview bar (never rendered by --production) */
 .preview-note{background:var(--plaster);border-bottom:1px solid var(--rule);color:var(--taupe);font-size:.8125rem;line-height:1.4;text-align:center;padding:8px var(--gutter)}
@@ -109,10 +111,40 @@ picture[data-lqip]{background-image:var(--lqip);background-size:100% 100%;backgr
 .site-nav a:hover::after{transform:scaleX(1);opacity:.4}
 .site-nav a[aria-current="page"]::after{transform:scaleX(1);opacity:1}
 .site-header__actions{display:flex;align-items:center;gap:2px;margin-left:clamp(4px,1.2vw,16px)}
-.icon-btn{display:inline-grid;place-items:center;width:44px;height:44px;border:0;background:none;padding:0;color:var(--ink);cursor:pointer;transition:opacity .3s}
-.icon-btn svg{transition:transform .35s var(--ease)}
-.icon-btn:hover{opacity:.62}
-.icon-btn:hover svg{transform:translateY(-1px)}
+/* Each account lights up in its own platform's colour on hover. At rest they are all
+   plain ink, so the header stays quiet — the colour is recognition, not decoration.
+   --glow is the halo behind the icon; --tint recolours the glyph itself. */
+.icon-btn{position:relative;display:inline-grid;place-items:center;width:44px;height:44px;border:0;background:none;padding:0;color:var(--ink);cursor:pointer;
+  transition:color .3s var(--ease)}
+.icon-btn::before{content:"";position:absolute;inset:4px;border-radius:50%;background:var(--glow,transparent);
+  opacity:0;transform:scale(.7);transition:opacity .35s var(--ease),transform .35s var(--ease)}
+.icon-btn svg{position:relative;transition:transform .35s var(--ease)}
+.icon-btn:hover svg,.icon-btn:focus-visible svg{transform:translateY(-1px)}
+.icon-btn:hover::before,.icon-btn:focus-visible::before{opacity:1;transform:scale(1)}
+.icon-btn:hover,.icon-btn:focus-visible{color:var(--tint,var(--ink))}
+
+/* WhatsApp green, Facebook blue, Instagram across its own magenta-to-amber range. The
+   Instagram halo is the one place a gradient is allowed, because it IS the brand mark. */
+.icon-btn--wa,.social--wa{--tint:#1DA851;--glow:radial-gradient(circle,rgba(37,211,102,.30),rgba(37,211,102,0) 70%)}
+.icon-btn--fb,.social--fb{--tint:#1877F2;--glow:radial-gradient(circle,rgba(24,119,242,.28),rgba(24,119,242,0) 70%)}
+.icon-btn--ig,.icon-btn--ig-personal,.social--ig,.social--ig-personal{--tint:#C7248B;
+  --glow:radial-gradient(circle at 32% 78%,rgba(253,176,63,.42),rgba(221,42,123,.34) 42%,rgba(129,52,175,.26) 68%,rgba(129,52,175,0) 78%)}
+
+/* Footer Connect: the same four accounts, with room to say which is which. */
+.socials{display:grid;gap:14px;margin:0;padding:0;list-style:none}
+.social{display:flex;align-items:center;gap:12px;text-decoration:none;color:inherit}
+.social__icon{position:relative;display:grid;place-items:center;width:34px;height:34px;flex:none;
+  border:1px solid var(--rule);color:currentColor;transition:color .3s var(--ease),border-color .3s var(--ease)}
+.social__icon::before{content:"";position:absolute;inset:-3px;border-radius:50%;background:var(--glow,transparent);
+  opacity:0;transform:scale(.7);transition:opacity .35s var(--ease),transform .35s var(--ease)}
+.social__icon svg{position:relative;width:17px;height:17px}
+.social__text{display:grid;gap:1px;min-width:0}
+.social__name{font-size:.9375rem;line-height:1.3}
+.social__sub{font-size:.8125rem;line-height:1.35;color:var(--taupe)}
+.social:hover .social__icon,.social:focus-visible .social__icon{color:var(--tint,var(--ink));border-color:currentColor}
+.social:hover .social__icon::before,.social:focus-visible .social__icon::before{opacity:1;transform:scale(1)}
+.social:hover .social__name,.social:focus-visible .social__name{text-decoration:underline;text-underline-offset:3px}
+@media (prefers-reduced-motion:reduce){.icon-btn::before{transition:opacity .01ms}}
 .menu-btn{display:none;width:44px;height:44px;border:0;background:none;padding:0;cursor:pointer;position:relative;margin-right:-10px}
 .menu-btn span{position:absolute;left:11px;right:11px;height:1.5px;background:var(--ink);transition:transform .35s var(--ease)}
 .menu-btn span:first-child{top:18px}
@@ -144,33 +176,49 @@ html.menu-open{overflow:hidden}
    desktop ≥900: full-width masthead; text column 35% / artwork column 65%, artwork flush right and sized by
    the viewport height. tablet 600–899: one-line masthead, stacked. phone <600: two-line masthead, stacked. */
 .hero{padding-block:clamp(6px,1.2vw,18px) clamp(72px,8vw,120px)}
-.hero__grid{container-type:inline-size;display:grid;grid-template-columns:minmax(0,35fr) minmax(0,65fr);column-gap:clamp(32px,4vw,72px);grid-template-areas:"mast mast" "ident work" "tag work" "act work" ". work";grid-template-rows:auto auto auto auto 1fr}
-.masthead{grid-area:mast;font-family:var(--serif);font-weight:300;font-size:calc(100cqi / 7.64);line-height:.84;letter-spacing:-.005em;margin:0 0 clamp(14px,1.6vw,24px) -.045em;white-space:nowrap}
+.hero__grid{container-type:inline-size;display:grid;grid-template-columns:minmax(0,35fr) minmax(0,65fr);column-gap:clamp(32px,4vw,72px);grid-template-areas:"mast mast" "ident work" "tag work" "act work" "note work" "meta work";grid-template-rows:auto auto auto auto auto 1fr}
+.masthead{grid-area:mast;font-family:var(--serif);font-weight:300;font-size:calc(100cqi / 8.2);line-height:.84;letter-spacing:-.005em;margin:0 0 clamp(14px,1.6vw,24px) -.045em;white-space:nowrap}
 .masthead span{display:inline-block}
 .hero__identity{grid-area:ident;font-size:clamp(1rem,1.25vw,1.2rem);line-height:1.5;margin:0;padding-top:4px}
 .hero__by{display:block}
 .hero__tagline{grid-area:tag;font-family:var(--serif);font-weight:350;font-size:clamp(2rem,3.3vw,3.4rem);line-height:1.08;margin:clamp(40px,11vh,136px) 0 36px}
 .hero__tagline span{display:block}
-.hero__actions{grid-area:act;display:grid;gap:12px;width:fit-content}
+/* The buttons fill the column rather than shrink-wrapping their labels, so the left side
+   of the hero reads as a single measured column against the artwork. */
+.hero__actions{grid-area:act;display:grid;gap:12px;width:100%;max-width:23rem}
+/* The artwork is tall, so the column beside it used to run out of content well before the
+   bottom. The note and the facts carry it down to meet the foot of the painting. */
+.hero__note{grid-area:note;max-width:34ch;margin:clamp(28px,3.4vh,44px) 0 0;color:var(--taupe);
+  font-size:.9375rem;line-height:1.65}
+.hero__meta{grid-area:meta;align-self:end;display:grid;gap:14px;margin:clamp(28px,4vh,56px) 0 0;max-width:23rem;
+  border-top:1px solid var(--rule);padding-top:20px}
+.hero__meta div{display:grid;gap:2px}
+.hero__meta dt{font-size:.75rem;letter-spacing:.08em;text-transform:uppercase;color:var(--taupe)}
+.hero__meta dd{margin:0;font-size:.9375rem;line-height:1.45}
 .hero__work{grid-area:work;justify-self:end;align-self:start;width:fit-content;max-width:100%;margin:calc(-1 * clamp(10px,1.1vw,16px)) 0 0}
 .hero__hang{display:block}
 .hero__hang img{width:min(calc((100cqi - clamp(32px,4vw,72px)) * .65),calc(clamp(520px,100svh - 12vw,940px) * var(--r)));height:auto;aspect-ratio:var(--r)}
 @media (prefers-reduced-motion:no-preference){
   .js .masthead{animation:rise 1.1s var(--ease) both}
-  .js .hero__hang{animation:unveil 1.5s .2s var(--ease) both}
+  /* A plain fade. This deliberately does NOT wipe: a clip-path that travels down the
+     artwork is indistinguishable from a photograph downloading badly, and reads as a
+     fault rather than as polish. */
+  .js .hero__hang{animation:appear .8s .1s var(--ease) both}
 }
 @keyframes rise{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:none}}
-@keyframes unveil{from{clip-path:inset(-60px -60px 100% -60px)}to{clip-path:inset(-60px -60px -90px -60px)}}
+@keyframes appear{from{opacity:0}to{opacity:1}}
 @media (min-width:600px) and (max-width:899px){
-  .hero__grid{grid-template-columns:minmax(0,1fr) minmax(0,1fr);column-gap:32px;grid-template-areas:"mast mast" "ident ident" "work work" "tag act";grid-template-rows:none}
+  .hero__grid{grid-template-columns:minmax(0,1fr) minmax(0,1fr);column-gap:32px;grid-template-areas:"mast mast" "ident ident" "work work" "tag act" "note note" "meta meta";grid-template-rows:none}
+  .hero__meta{grid-template-columns:repeat(3,minmax(0,1fr));max-width:none;gap:20px;margin-top:clamp(28px,4vw,44px)}
   .hero__work{margin-top:22px}
   .hero__hang img{width:min(100cqi,calc(min(62svh,760px) * var(--r)))}
   .hero__tagline{margin:52px 0 0;font-size:clamp(2rem,5vw,2.6rem)}
   .hero__actions{align-self:end;width:auto}
 }
 @media (max-width:599px){
-  .hero__grid{grid-template-columns:minmax(0,1fr);grid-template-areas:"mast" "ident" "work" "tag" "act";grid-template-rows:none}
-  .masthead{font-size:calc(100cqi / 3.86);white-space:normal;line-height:.86;margin-bottom:14px}
+  .hero__grid{grid-template-columns:minmax(0,1fr);grid-template-areas:"mast" "ident" "work" "tag" "act" "note" "meta";grid-template-rows:none}
+  .hero__meta{grid-template-columns:minmax(0,1fr);gap:14px;margin-top:32px}
+  .masthead{font-size:calc(100cqi / 4.05);white-space:normal;line-height:.86;margin-bottom:14px}
   .masthead span{display:block}
   .hero__identity{font-size:.9375rem}
   .hero__work{justify-self:stretch;width:auto;margin-top:22px}
@@ -181,9 +229,10 @@ html.menu-open{overflow:hidden}
   .hero__actions{width:auto}
 }
 
-/* reveal (JS adds .will-reveal only to artworks that start below the fold) */
-.js .will-reveal{clip-path:inset(-60px -60px 100% -60px);transition:clip-path 1.3s var(--ease)}
-.js .will-reveal.is-in{clip-path:inset(-60px -60px -90px -60px)}
+/* reveal (JS adds .will-reveal only to artworks that start below the fold) — opacity
+   only, for the reason given above: nothing here may travel down a painting. */
+.js .will-reveal{opacity:0;transition:opacity .6s var(--ease)}
+.js .will-reveal.is-in{opacity:1}
 
 /* section heads */
 .section-head{display:grid;gap:14px;margin-bottom:clamp(40px,5vw,72px);max-width:760px}
@@ -758,7 +807,7 @@ html.menu-open{overflow:hidden}
 
 /* Narrow phones: the header keeps the studio account, Facebook and WhatsApp.
    Sreeparna's personal account stays one tap away in the menu, where both are named. */
-@media (max-width:479px){.site-header__actions .icon-btn--personal{display:none}}
+@media (max-width:479px){.site-header__actions .icon-btn--ig-personal{display:none}}
 
 @media (max-width:599px){
   body{font-size:1rem}
