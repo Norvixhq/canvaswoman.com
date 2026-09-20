@@ -1,20 +1,20 @@
 {
   "name": "Canvas Woman \u2014 Original & Commissioned Art by Sreeparna Poddar",
   "short_name": "Canvas Woman",
-  "start_url": "/canvaswoman.com/",
-  "scope": "/canvaswoman.com/",
+  "start_url": "/",
+  "scope": "/",
   "display": "browser",
   "background_color": "#F5F0E7",
   "theme_color": "#F5F0E7",
   "description": "Discover original and commissioned paintings by Indian artist Sreeparna Poddar. Contemporary artwork created for collectors, interiors and distinctive spaces.",
   "icons": [
     {
-      "src": "/canvaswoman.com/assets/img/favicon.svg",
+      "src": "/assets/img/favicon.svg",
       "sizes": "any",
       "type": "image/svg+xml"
     },
     {
-      "src": "/canvaswoman.com/assets/img/apple-touch-icon.png",
+      "src": "/assets/img/apple-touch-icon.png",
       "sizes": "180x180",
       "type": "image/png"
     }

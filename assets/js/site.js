@@ -181,6 +181,9 @@
       if (typeof resetZoom === 'function') resetZoom();
       at = (i + zooms.length) % zooms.length;
       const z = zooms[at];
+      /* Give the viewer the artwork's proportions before the file arrives, so the
+         dialog opens at the right shape instead of resizing under the reader. */
+      if (z.dataset.w && z.dataset.h) { img.width = z.dataset.w; img.height = z.dataset.h; }
       img.src = z.dataset.zoom;
       img.alt = z.dataset.alt || '';
       cap.textContent = z.dataset.caption || '';

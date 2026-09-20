@@ -27,6 +27,9 @@
 html{-webkit-text-size-adjust:100%;text-size-adjust:100%;scroll-padding-top:calc(var(--header-h) + 20px)}
 body{margin:0;background:var(--ivory);color:var(--ink);font-family:var(--sans);font-size:1.0625rem;line-height:1.65;-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;text-rendering:optimizeLegibility}
 img,svg{display:block;max-width:100%}
+/* The hidden attribute must win over any component's own display value. Without
+   this, a control set to hidden in JS still renders and still takes clicks. */
+[hidden]{display:none!important}
 picture{display:contents}
 img{height:auto}
 a{color:inherit;text-decoration-thickness:1px;text-underline-offset:.25em;text-decoration-color:var(--line)}
@@ -125,10 +128,16 @@ main:focus{outline:none}
 
 /* WhatsApp green, Facebook blue, Instagram across its own magenta-to-amber range. The
    Instagram halo is the one place a gradient is allowed, because it IS the brand mark. */
-.icon-btn--wa,.social--wa{--tint:#1DA851;--glow:radial-gradient(circle,rgba(37,211,102,.30),rgba(37,211,102,0) 70%)}
-.icon-btn--fb,.social--fb{--tint:#1877F2;--glow:radial-gradient(circle,rgba(24,119,242,.28),rgba(24,119,242,0) 70%)}
-.icon-btn--ig,.icon-btn--ig-personal,.social--ig,.social--ig-personal{--tint:#C7248B;
+.icon-btn--wa,.social--wa,.channel--whatsapp{--tint:#1DA851;--glow:radial-gradient(circle,rgba(37,211,102,.30),rgba(37,211,102,0) 70%)}
+.icon-btn--fb,.social--fb,.channel--facebook{--tint:#1877F2;--glow:radial-gradient(circle,rgba(24,119,242,.28),rgba(24,119,242,0) 70%)}
+.icon-btn--ig,.icon-btn--ig-personal,.social--ig,.social--ig-personal,.channel--instagram{--tint:#C7248B;
   --glow:radial-gradient(circle at 32% 78%,rgba(253,176,63,.42),rgba(221,42,123,.34) 42%,rgba(129,52,175,.26) 68%,rgba(129,52,175,0) 78%)}
+/* Email has no brand, so it takes the site's own brass rather than borrowing a colour. */
+.icon-btn--email,.social--email,.channel--email{--tint:#7C5F34;--glow:radial-gradient(circle,rgba(168,139,92,.34),rgba(168,139,92,0) 70%)}
+.icon-btn--yt,.social--yt,.channel--youtube{--tint:#C4302B;--glow:radial-gradient(circle,rgba(255,0,0,.26),rgba(255,0,0,0) 70%)}
+/* TikTok's mark is black split by cyan and magenta, so the halo carries both. */
+.icon-btn--tt,.social--tt,.channel--tiktok{--tint:#C8134A;
+  --glow:radial-gradient(circle at 36% 34%,rgba(37,244,238,.38),rgba(254,44,85,.30) 48%,rgba(254,44,85,0) 74%)}
 
 /* Footer Connect: the same four accounts, with room to say which is which. */
 .socials{display:grid;gap:14px;margin:0;padding:0;list-style:none}
@@ -785,8 +794,10 @@ html.menu-open{overflow:hidden}
 .channel-list{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:clamp(20px,2.4vw,36px)}
 .channel{display:flex;flex-direction:column;align-items:flex-start;border-top:1px solid var(--ink);padding-top:22px}
 .channel--primary{grid-column:span 1}
-.channel__mark{display:block;margin-bottom:18px;color:var(--ink)}
+/* The contact card takes its platform's colour when you reach for it, like the icons. */
+.channel__mark{display:block;margin-bottom:18px;color:var(--ink);transition:color .35s var(--ease)}
 .channel__mark .icon{width:26px;height:26px}
+.channel:hover .channel__mark,.channel:focus-within .channel__mark{color:var(--tint,var(--ink))}
 .channel__label{font-family:var(--sans);font-size:.8125rem;font-weight:600;letter-spacing:.02em;color:var(--taupe);margin:0 0 6px}
 .channel__value{font-family:var(--serif);font-size:clamp(1.25rem,1.7vw,1.6rem);line-height:1.15;margin:0 0 10px}
 .channel__note{font-size:.9063rem;color:var(--taupe);margin:0 0 24px;flex:1}
@@ -828,19 +839,39 @@ html.menu-open{overflow:hidden}
 
 /* Narrow phones: the header keeps the studio account, Facebook and WhatsApp.
    Sreeparna's personal account stays one tap away in the menu, where both are named. */
-/* Both Instagram accounts stay in the bar on the narrowest phones. The controls narrow
-   rather than drop: each keeps its full 44px height, so the tap target is unaffected. */
+/* Six accounts and a menu button will not fit beside the wordmark on a phone — measured,
+   they overflow every width up to 480px. So the bar carries the four a visitor is most
+   likely to reach for, and the pop-out menu carries all six with their names and what
+   each one is. Nothing is dropped; the two quieter accounts are one tap away. The
+   controls also narrow as the screen does, but never lose their 44px tap height. */
+@media (max-width:767px){
+  .site-header__actions .icon-btn--fb,
+  .site-header__actions .icon-btn--ig-personal{display:none}
+}
+/* Between the tablet breakpoint and a roomy desktop, all seven icons share the bar with
+   the full navigation, so they narrow to keep the row inside the gutters. */
+@media (min-width:768px) and (max-width:1200px){
+  .site-header__actions .icon-btn{width:36px}
+}
+/* Five controls plus the menu button now share the bar with the wordmark, so they step
+   down in three stages as the screen narrows. Width shrinks; the 44px tap height never
+   does, which is what the finger actually needs. */
 @media (max-width:479px){
   .site-header__bar{gap:8px}
   .site-header__actions{margin-left:0}
-  .site-header__actions .icon-btn{width:36px}
-  .menu-btn{width:36px;margin-right:-8px}
-  .wordmark{font-size:1rem;letter-spacing:.045em}
-}
-@media (max-width:359px){
   .site-header__actions .icon-btn{width:32px}
   .menu-btn{width:32px;margin-right:-6px}
-  .wordmark{font-size:.9375rem;letter-spacing:.03em}
+  .wordmark{font-size:1rem;letter-spacing:.04em}
+}
+@media (max-width:379px){
+  .site-header__actions .icon-btn{width:29px}
+  .menu-btn{width:29px;margin-right:-5px}
+  .wordmark{font-size:.9375rem;letter-spacing:.025em}
+}
+@media (max-width:339px){
+  .site-header__actions .icon-btn{width:27px}
+  .menu-btn{width:27px;margin-right:-4px}
+  .wordmark{font-size:.875rem;letter-spacing:.02em}
 }
 
 @media (max-width:599px){
